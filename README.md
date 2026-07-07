@@ -21,7 +21,7 @@ docker network create my-shared-network
 * Run the `docker compose up` or `docker compose up -d`.
 
 ```bash
-git clone https://github.com/sinobash/messaging.git
+git clone https://github.com/sinobash/messaging-stack.git
 cd messaging-stack
 cp .env.example .env
 # Modify .env.example as needed
