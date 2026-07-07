@@ -1,0 +1,48 @@
+services:
+  redis:
+    image: ${REDIS_VERSION}
+    container_name: dev_redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_DEFAULT_PASS}
+    command: redis-server --requirepass ${REDIS_DEFAULT_PASS}
+    ports:
+      - "${LOCAL_LISTEN_ADDR}:${HOST_PORT_REDIS}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - shared-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_DEFAULT_PASS}", "PING"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  rabbitmq:
+    image: rabbitmq:4.3-management-alpine
+    container_name: dev_rabbitmq_broker
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+      - "${LOCAL_LISTEN_ADDR}:${HOST_AMQP_PORT_RABBITMQ}:5672"   # AMQP protocol port
+      - "${LOCAL_LISTEN_ADDR}:${HOST_PORT_RABBITMQ}:15672" # Management UI port
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  shared-network:
+    external: true
+    name: shared_ext_net
